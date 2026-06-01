@@ -74,13 +74,13 @@ export class ChatbotService {
             }
         }
         const chatbot = await this.chatbot({ id, message });
-        await this.prisma.message.create({
-            data: {
-                type: "text",
-                content: message,
-                remoteJid: "web",
-            }
-        });
+        // await this.prisma.message.create({
+        //     data: {
+        //         type: "text",
+        //         content: message,
+        //         remoteJid: "web",
+        //     }
+        // });
         return chatbot;
     }
 }
