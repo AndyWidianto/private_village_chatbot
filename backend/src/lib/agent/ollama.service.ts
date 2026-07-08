@@ -84,7 +84,8 @@ export class OllamaService implements OnModuleInit {
                         content: prompt
                     }
                 ],
-                stream: false
+                stream: false,
+                think: false,
             });
             const text = response.message.content;
             return text;
