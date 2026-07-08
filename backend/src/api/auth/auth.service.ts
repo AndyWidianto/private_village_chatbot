@@ -30,14 +30,16 @@ export class AuthService {
             where: { id: user.id },
             data: { refreshToken: refreshToken }
         })
-        return { accessToken, refreshToken, user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            username: user.username,
-            profileUrl: user.profileUrl
-        } };
+        return {
+            accessToken, refreshToken, user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                username: user.username,
+                profileUrl: user.profileUrl
+            }
+        };
     }
     async Register(dto: RegisterDto) {
         const userExists = await this.prisma.user.findUnique({
@@ -49,14 +51,21 @@ export class AuthService {
 
         const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-        await this.prisma.user.create({
+        const user = await this.prisma.user.create({
             data: {
                 username: dto.username,
                 email: dto.email,
                 password: hashedPassword,
-                role: "admin"
+                role: "user"
             }
         });
+        await this.prisma.citizen.create({
+            data: {
+                fullName: dto.username,
+                platform: "WEB_CHAT",
+                platformId: user.id,
+            }
+        })
         return { message: "Register successfully" };
     }
     async RefreshToken({ id, email, refreshToken }: { id: string, email: string, refreshToken?: string }) {
@@ -82,7 +91,7 @@ export class AuthService {
 
         return { message: "Logged out successfully" };
     }
-    async DeleteAccount(data: { id: string, email: string, iat: number, exp: number, refreshToken?: string}) {
+    async DeleteAccount(data: { id: string, email: string, iat: number, exp: number, refreshToken?: string }) {
         const user = await this.prisma.user.findUnique({ where: { id: data.id } });
         if (!user) {
             throw new NotFoundException("User tidak ditemukan");

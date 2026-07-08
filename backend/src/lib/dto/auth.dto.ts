@@ -8,6 +8,14 @@ export class LoginDto {
     @IsNotEmpty({ message: 'Password tidak boleh kosong' })
     password: string;
 }
+export class LoginUserDto {
+    @IsNotEmpty({ message: 'number tidak boleh kosong' })
+    @IsEmail()
+    number: string;
+
+    @IsNotEmpty({ message: 'pin tidak boleh kosong' })
+    pin: string;
+}
 
 export class RegisterDto {
     @IsNotEmpty()

@@ -68,4 +68,17 @@ export class MessageService {
             data: stats.map(s => s.count),
         };
     }
+
+    async getMessages(number: string) {
+        const parseNumber = number.startsWith("08") ? number.replace(/^0/, "62") : number;
+        console.log(parseNumber)
+        return this.prisma.message.findMany({
+            where: {
+                remoteJid: `${parseNumber}@s.whatsapp.net`
+            },
+            orderBy: {
+                createdAt: "asc"
+            }
+        })
+    }
 }

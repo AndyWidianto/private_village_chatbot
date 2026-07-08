@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { MessageService } from "./message.service";
 import { AuthGuard } from "@nestjs/passport";
 import { CreateMessageDto } from "../../lib/dto/message.dto";
@@ -18,5 +18,10 @@ export class MessageController {
     @UseGuards(AuthGuard("jwt"))
     async getStats() {
         return this.service.Stats();
+    }
+
+    @Get(":number")
+    async getMessages(@Param("number") number: string) {
+        return this.service.getMessages(number)
     }
 }

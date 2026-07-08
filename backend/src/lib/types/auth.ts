@@ -20,7 +20,7 @@ export interface PayloadUser {
 export interface PayloadJWT {
     id: string;
     email: string;
-    role: UserRole;
+    role: UserRole | "user";
     name: string;
 }
 export interface RequestAndPayload extends Request {
