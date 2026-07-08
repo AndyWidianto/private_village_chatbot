@@ -85,27 +85,27 @@ const ChatModal = ({ isOpen, onClose, messages, loading, handleChatbot, setMessa
                 {/* Chat Body - Gradient Background */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[radial-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-50 via-white to-slate-50 dark:from-slate-900 dark:via-[#0F172A] dark:to-[#0F172A]">
                     {messages.map((msg) => (
-                        <div key={msg.id} className={`flex ${msg.sender === 'client' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2`}>
-                            <div className={`flex gap-3 max-w-[85%] ${msg.sender === 'client' ? 'flex-row-reverse' : 'flex-row'}`}>
+                        <div key={msg.id} className={`flex ${!msg.fromMe ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2`}>
+                            <div className={`flex gap-3 max-w-[85%] ${!msg.fromMe ? 'flex-row-reverse' : 'flex-row'}`}>
 
                                 {/* Avatar dengan Border Neon */}
-                                <div className={`w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center shadow-sm ${msg.sender === 'client'
+                                <div className={`w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center shadow-sm ${!msg.fromMe
                                         ? 'bg-slate-800 text-white'
                                         : 'bg-white dark:bg-slate-800 border border-indigo-100 dark:border-indigo-500/30 text-indigo-600'
                                     }`}>
-                                    {msg.sender === 'client' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                                    {!msg.fromMe ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                                 </div>
 
                                 {/* Bubble Chat dengan Efek Bayangan Lembut */}
-                                <div className={`flex flex-col ${msg.sender === 'client' ? 'items-end' : 'items-start'}`}>
-                                    <div className={`p-4 rounded-2xl text-[13.5px] leading-relaxed shadow-sm transition-all hover:shadow-md ${msg.sender === 'client'
+                                <div className={`flex flex-col ${!msg.fromMe ? 'items-end' : 'items-start'}`}>
+                                    <div className={`p-4 rounded-2xl text-[13.5px] leading-relaxed shadow-sm transition-all hover:shadow-md ${!msg.fromMe
                                             ? 'bg-indigo-600 text-white rounded-tr-none shadow-indigo-200 dark:shadow-none'
                                             : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-100 dark:border-slate-700/50 shadow-slate-200/50 dark:shadow-none'
                                         }`}>
-                                        {formatAIResponse(msg.text)}
+                                        {formatAIResponse(msg.content)}
                                     </div>
                                     <span className="text-[10px] mt-1.5 font-semibold text-slate-400 uppercase tracking-tighter opacity-70">
-                                        {formatDistanceToNow(new Date(msg.time), { addSuffix: true, locale: id })}
+                                        {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true, locale: id })}
                                     </span>
                                 </div>
                             </div>

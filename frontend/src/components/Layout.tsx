@@ -7,26 +7,26 @@ import {
   CheckSquare, Settings,
   CalendarCheck,
   CirclePlus,
-  Sparkles,
-  Bot,
+  // Sparkles,
+  // Bot,
   Users,
   Files,
 } from "lucide-react";
-import MotionModal from './Motion';
-import ChatModal from './ChatModal';
+//import MotionModal from './Motion';
+//import ChatModal from './ChatModal';
 // import useSocket from '../lib/socket';
-import NotificationModal from './NotificationModal';
+//import NotificationModal from './NotificationModal';
 import { useAuthStore } from '../lib/store/authStore';
-import useChatbot from '../hooks/chatbot';
+//import useChatbot from '../hooks/chatbot';
 import { toast } from 'sonner';
 import useAxios from '../lib/axios.service';
 
 
-interface IncomeMessage {
-  name: string;
-  message: string;
-  number: string;
-}
+// interface IncomeMessage {
+//   name: string;
+//   message: string;
+//   number: string;
+// }
 export default function Layout() {
   const { accessToken: _, logout, user } = useAuthStore();
   const { axiosPrivate } = useAxios();
@@ -36,9 +36,9 @@ export default function Layout() {
     title: "Dashboard",
     description: ""
   });
-  const [isOpenChat, setIsOpenChat] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [incomeMessage, setIncomeMessage] = useState<IncomeMessage | null>(null);
+  // const [isOpenChat, setIsOpenChat] = useState(false);
+  // const [sessionId, setSessionId] = useState<string | null>(null);
+  // const [incomeMessage, setIncomeMessage] = useState<IncomeMessage | null>(null);
   const sidebars = [
     ...user && user.role === "super_admin" ? [
       {
@@ -146,20 +146,20 @@ export default function Layout() {
       }
     ]
   ];
-  const { messages, setMessage, message, handleChatbot, loading } = useChatbot({ sessionId: sessionId || "" });
+  //const { messages, setMessage, message, handleChatbot, loading } = useChatbot({ sessionId: sessionId || "" });
   const navigate = useNavigate();
   const toggleSidebar = () => {
     setOpenSidebar(!openSidebar);
   }
-  const handleClose = () => {
-    setIsOpenChat(false);
-    setIncomeMessage(null);
-  }
+  // const handleClose = () => {
+  //   setIsOpenChat(false);
+  //   setIncomeMessage(null);
+  // }
 
-  const setRandomId = () => {
-    const id = crypto.randomUUID();
-    setSessionId(id);
-  };
+  // const setRandomId = () => {
+  //   const id = crypto.randomUUID();
+  //   setSessionId(id);
+  // };
   const handleLogout = async () => {
     if (!confirm("Apakah anda yakin ingin logout?")) return;
     try {
@@ -180,7 +180,7 @@ export default function Layout() {
     }
   };
   useEffect(() => {
-    setRandomId();
+    // setRandomId();
     // socket.on("connect", () => {
     //   console.log("connect successfully");
     // })
@@ -212,35 +212,27 @@ export default function Layout() {
         <div className="p-1 md:pl-4">
           <Outlet />
         </div>
-        <button
+        {/* <button
           onClick={() => setIsOpenChat(true)}
           className="fixed right-6 bottom-6 group flex items-center gap-3 transition-all duration-300"
         >
-          {/* Tooltip/Label yang muncul saat hover */}
           <span className="opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300 bg-white dark:bg-slate-800 shadow-xl border dark:border-slate-700 px-4 py-2 rounded-2xl text-sm font-bold text-indigo-600 dark:text-indigo-400 pointer-events-none">
             Tanya AI
           </span>
-
-          {/* Main Button Container */}
           <div className="relative">
-            {/* Efek Ping/Pulsing di belakang tombol */}
             <div className="absolute inset-0 rounded-full bg-indigo-500 animate-ping opacity-20"></div>
-
-            {/* Tombol Utama */}
             <div className="relative w-14 h-14 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-2xl shadow-lg shadow-indigo-500/40 flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 group-active:scale-95">
               <Bot className="w-7 h-7" />
-
-              {/* Badge Aksesoris (Sparkles) */}
               <div className="absolute -top-1 -right-1 bg-amber-400 text-slate-900 p-1 rounded-lg shadow-sm">
                 <Sparkles className="w-3 h-3 fill-current" />
               </div>
             </div>
           </div>
-        </button>
-        <MotionModal onClose={handleClose} isOpen={isOpenChat}>
+        </button> */}
+        {/* <MotionModal onClose={handleClose} isOpen={isOpenChat}>
           <ChatModal sessionId={sessionId || ""} onClose={handleClose} isOpen={isOpenChat} messages={messages} setMessage={setMessage} message={message} handleChatbot={handleChatbot} loading={loading} />
         </MotionModal>
-        <NotificationModal isVisible={incomeMessage !== null} message={incomeMessage?.message || ""} senderName={incomeMessage?.name || ""} onClose={handleClose} />
+        <NotificationModal isVisible={incomeMessage !== null} message={incomeMessage?.message || ""} senderName={incomeMessage?.name || ""} onClose={handleClose} /> */}
       </main>
     </div>
   );
