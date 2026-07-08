@@ -23,7 +23,6 @@ const QRCodeModal = ({ isOpen, onClose, deviceId }: QrCodeModalProps) => {
         try {
             const res = await axiosPrivate.post(`/devices/connection/${deviceId}`);
             const data = res.data;
-            console.log(data);
             setQrValue(data.code);
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Gagal mengambil data devices";
@@ -64,7 +63,7 @@ const QRCodeModal = ({ isOpen, onClose, deviceId }: QrCodeModalProps) => {
                     >
                         <X className="w-5 h-5 text-gray-500" />
                     </button>
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">QR Code Pembayaran</h3>
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">QR Code WhatsApp</h3>
                     <p className="text-sm text-gray-500 mt-1">Scan kode di bawah ini</p>
                 </div>
 

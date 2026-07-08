@@ -1,6 +1,7 @@
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import useLogin from '../hooks/login';
 import Loading from '../components/Loading';
+import { Link } from 'react-router';
 
 export default function LoginPage() {
     const { loading, setFormData, setShowPassword, showPassword, handleSubmit } = useLogin();
@@ -106,9 +107,9 @@ export default function LoginPage() {
             </button>
           </div> */}
 
-          {/* <p className="text-center mt-10 text-sm text-slate-500">
-            Belum punya akun? <a href="#" className="font-bold text-orange-500 hover:underline">Daftar gratis</a>
-          </p> */}
+          <p className="text-center mt-10 text-sm text-slate-500">
+            Belum punya akun? <Link to="/register" className="font-bold text-orange-500 hover:underline">Daftar gratis</Link>
+          </p>
         </div>
       </div>
     </div>
