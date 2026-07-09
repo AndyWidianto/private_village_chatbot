@@ -26,6 +26,7 @@ const DashboardWarga = () => {
   const [compliants, setComplaints] = useState<Complaint[]>([]);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navigate = useNavigate();
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -112,26 +113,49 @@ const DashboardWarga = () => {
   return (
     <div className={`flex h-screen w-screen overflow-hidden ${isDarkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'}`}>
 
-      {/* ================= SIDEBAR (Sesuai image_103d80.png) ================= */}
-      <aside className="w-64 h-full bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 flex flex-col justify-between p-5 flex-shrink-0">
-        <div className="space-y-8">
+      {/* Backdrop Overlay untuk Mobile saat Sidebar Terbuka */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
-          <div className="flex items-center gap-3 px-2 py-1">
-            <div className="relative p-2 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl shadow-md shadow-blue-500/20 flex items-center justify-center text-white">
-              <Bot className='w-6 h-6' />
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1 bg-orange-400 blur-sm opacity-60"></div>
+      {/* ================= SIDEBAR (Sesuai image_103d80.png) ================= */}
+      <aside className={`
+    fixed inset-y-0 left-0 z-50 lg:static 
+    w-64 h-full bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 
+    flex flex-col justify-between p-5 flex-shrink-0 transition-transform duration-300
+    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+  `}>
+        <div className="space-y-8">
+          {/* Header Sidebar & Tombol Close untuk Mobile */}
+          <div className="flex items-center justify-between px-2 py-1">
+            <div className="flex items-center gap-3">
+              <div className="relative p-2 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl shadow-md shadow-blue-500/20 flex items-center justify-center text-white">
+                <Bot className='w-6 h-6' />
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1 bg-orange-400 blur-sm opacity-60"></div>
+              </div>
+              <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                Chat<span className="text-blue-600 dark:text-blue-400">BOT</span>
+              </span>
             </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Chat<span className="text-blue-600 dark:text-blue-400">BOT</span>
-            </span>
+            {/* Tombol Tutup Sidebar di Mobile */}
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
           {/* Menu Navigation */}
           <nav className="space-y-1">
-
             {/* Menu: Chatbot */}
             <button
-              onClick={() => setActiveMenu('chatbot')}
+              onClick={() => { setActiveMenu('chatbot'); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeMenu === 'chatbot'
                 ? 'text-blue-600 dark:text-blue-400 bg-blue-50/60 dark:bg-blue-950/30 font-semibold'
                 : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
@@ -143,7 +167,7 @@ const DashboardWarga = () => {
 
             {/* Menu: Pengaduan */}
             <button
-              onClick={() => setActiveMenu('pengaduan')}
+              onClick={() => { setActiveMenu('pengaduan'); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeMenu === 'pengaduan'
                 ? 'text-blue-600 dark:text-blue-400 bg-blue-50/60 dark:bg-blue-950/30 font-semibold'
                 : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
@@ -153,8 +177,9 @@ const DashboardWarga = () => {
               Pengaduan
             </button>
 
+            {/* Menu: Setting */}
             <button
-              onClick={() => setActiveMenu('setting')}
+              onClick={() => { setActiveMenu('setting'); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeMenu === 'setting'
                 ? 'text-blue-600 dark:text-blue-400 bg-blue-50/60 dark:bg-blue-950/30 font-semibold'
                 : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
@@ -173,13 +198,13 @@ const DashboardWarga = () => {
         <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center gap-3 px-4 py-2 my-4 rounded-xl text-sm font-medium transition-all bg-red-200 text-red-500`}
+            className="w-full flex items-center gap-3 px-4 py-2 my-4 rounded-xl text-sm font-medium transition-all bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-200"
           >
             <LogOut className="w-6 h-6" />
             Keluar Sesi
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center text-sm">
+            <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center text-sm flex-shrink-0">
               {(user?.name || "B").slice(0, 1)}
             </div>
             <div className="flex-1 min-w-0">
@@ -191,16 +216,36 @@ const DashboardWarga = () => {
       </aside>
 
       {/* ================= AREA UTAMA (KONTEN DINAMIS) ================= */}
-      <main className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950">
+      <main className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-hidden">
+
+        {/* Top Navbar khusus Mobile View */}
+        <header className="flex lg:hidden items-center justify-between p-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 -ml-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
+            <span className="font-bold text-sm text-slate-800 dark:text-white capitalize">
+              {activeMenu}
+            </span>
+          </div>
+          <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center text-xs">
+            {(user?.name || "B").slice(0, 1)}
+          </div>
+        </header>
 
         {/* VIEW: CHATBOT */}
         {activeMenu === 'chatbot' && (
-          <div className="flex flex-col h-full max-w-4xl mx-auto w-full p-6">
+          <div className="flex flex-col h-full max-w-4xl mx-auto w-full p-3 sm:p-6 overflow-hidden">
             <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl flex flex-col h-full shadow-sm overflow-hidden">
               <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div>
-                  <h2 className="font-bold text-slate-900 dark:text-white">Layanan Mandiri ChatBOT</h2>
-                  <p className="text-xs text-emerald-500 flex items-center gap-1">
+                  <h2 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">Layanan Mandiri ChatBOT</h2>
+                  <p className="text-[11px] sm:text-xs text-emerald-500 flex items-center gap-1 mt-0.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Alur Pra-Laporan Aktif
                   </p>
                 </div>
@@ -210,7 +255,7 @@ const DashboardWarga = () => {
               <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50/50 dark:bg-slate-900/20">
                 {messages.map((msg) => (
                   <div key={msg.id} className={`flex ${!msg.fromMe ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[75%] p-3 px-4 rounded-2xl text-sm leading-relaxed shadow-sm ${!msg.fromMe
+                    <div className={`max-w-[85%] sm:max-w-[75%] p-3 px-4 rounded-2xl text-sm leading-relaxed shadow-sm ${!msg.fromMe
                       ? 'bg-blue-600 text-white rounded-tr-none'
                       : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-100 dark:border-slate-700 rounded-tl-none'
                       }`}>
@@ -222,7 +267,7 @@ const DashboardWarga = () => {
               </div>
 
               {/* Form Input */}
-              <form onSubmit={handleSendMessage} className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-2">
+              <form onSubmit={handleSendMessage} className="p-3 sm:p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-2">
                 <input
                   type="text"
                   value={inputMessage}
@@ -230,7 +275,7 @@ const DashboardWarga = () => {
                   placeholder="Ketik pesan keluhan ke bot..."
                   className="flex-1 bg-slate-50 dark:bg-slate-950 text-sm border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 dark:text-white"
                 />
-                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-5 py-2 rounded-xl font-medium transition shadow-sm">
+                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 sm:px-5 py-2 rounded-xl font-medium transition shadow-sm">
                   Kirim
                 </button>
               </form>
@@ -240,28 +285,28 @@ const DashboardWarga = () => {
 
         {/* VIEW: PENGADUAN */}
         {activeMenu === 'pengaduan' && (
-          <div className="p-8 overflow-y-auto h-full max-w-5xl w-full mx-auto space-y-6">
+          <div className="p-4 sm:p-8 overflow-y-auto h-full max-w-5xl w-full mx-auto space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Daftar Riwayat Pengaduan</h2>
-              <p className="text-sm text-slate-400">Gunakan data Anda untuk melacak penanganan berkas resmi</p>
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Daftar Riwayat Pengaduan</h2>
+              <p className="text-xs sm:text-sm text-slate-400">Gunakan data Anda untuk melacak penanganan berkas resmi</p>
             </div>
 
             <div className="grid gap-4">
               {compliants.map((item) => (
-                <div key={item.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-3">
-                  <div className="flex justify-between items-start">
+                <div key={item.id} className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                     <div>
-                      <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded">
+                      <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded">
                         {item.id}
                       </span>
-                      <h3 className="font-bold text-slate-800 dark:text-white text-base mt-2">{item.title}</h3>
+                      <h3 className="font-bold text-slate-800 dark:text-white text-sm sm:text-base mt-2">{item.title}</h3>
                     </div>
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${item.status === "RESOLVED" ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30' : 'bg-amber-50 text-amber-600 dark:bg-amber-950/30'
+                    <span className={`self-start text-[11px] sm:text-xs px-2.5 py-1 rounded-full font-medium ${item.status === "RESOLVED" ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30' : 'bg-amber-50 text-amber-600 dark:bg-amber-950/30'
                       }`}>
                       {item.status}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400">Dilaporkan pada: {formatDate(item.createdAt)}</p>
+                  <p className="text-[11px] text-slate-400">Dilaporkan pada: {formatDate(item.createdAt)}</p>
                   <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400">
                     <strong className="block text-slate-700 dark:text-slate-200 mb-1">Hasil Tanggapan Instansi:</strong>
                     {item.officerNotes}
@@ -274,21 +319,21 @@ const DashboardWarga = () => {
 
         {/* VIEW: SETTING */}
         {activeMenu === 'setting' && (
-          <div className="p-8 max-w-2xl w-full mx-auto space-y-6">
+          <div className="p-4 sm:p-8 max-w-2xl w-full mx-auto space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Pengaturan Akun Warga</h2>
-              <p className="text-sm text-slate-400">Konfigurasi sinkronisasi data kependudukan dan integrasi WhatsApp</p>
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Pengaturan Akun Warga</h2>
+              <p className="text-xs sm:text-sm text-slate-400">Konfigurasi sinkronisasi data kependudukan dan integrasi WhatsApp</p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
                 <div>
                   <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Tema Aplikasi Dashboard</h4>
                   <p className="text-xs text-slate-400">Ganti tampilan mode gelap atau terang</p>
                 </div>
                 <button
                   onClick={() => setIsDarkMode(!isDarkMode)}
-                  className="px-4 py-2 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                  className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
                 >
                   {isDarkMode ? '☀️ Mode Terang' : '🌙 Mode Gelap'}
                 </button>
