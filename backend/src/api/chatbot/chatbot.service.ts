@@ -36,7 +36,7 @@ export class ChatbotService {
             where: { type: "ai_rag", isActive: true }
         });
 
-        let searchMessage = await this.ollama.reWrite(data.id, data.message);
+        let searchMessage = await this.gemini.reWrite(data.id, data.message);
         const userVector = await this.ollama.embeddings(searchMessage);
         const vectorString = `[${userVector.join(',')}]`;
 
@@ -351,9 +351,7 @@ export class ChatbotService {
     }
 
     async RoomChat(user: PayloadJWT, number: string, message: string) {
-        console.time("Response AI");
         let answer = "";
-        console.log("Number:", number);
 
         let historyChat = CACHE_RAM_HISTORY_CHAT[number];
 

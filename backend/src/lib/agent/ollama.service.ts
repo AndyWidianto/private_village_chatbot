@@ -85,10 +85,11 @@ export class OllamaService implements OnModuleInit {
                     }
                 ],
                 stream: false,
-                think: false,
+                think: "low",
             });
             const text = response.message.content;
-            return text;
+            const cleanedText = (text.split('===JAWABAN===').pop() || text).trim();
+            return cleanedText;
         } catch (err) {
             console.error(`Gagal mendapatkan jawaban:`, err);
             throw new InternalServerErrorException("Gagal mendapat jawaban");
