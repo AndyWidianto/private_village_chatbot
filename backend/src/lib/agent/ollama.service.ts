@@ -5,7 +5,6 @@ import { ConfigService } from "@nestjs/config";
 import { CACHE_RAM_HISTORY_CHAT } from "../constant/constant-chats";
 
 
-
 @Injectable()
 export class OllamaService implements OnModuleInit {
     private genAI: GoogleGenerativeAI;
@@ -85,7 +84,11 @@ export class OllamaService implements OnModuleInit {
                     }
                 ],
                 stream: false,
-                think: "low",
+                options: {
+                    temperature: 0.0, // Membuat jawaban sangat kaku dan langsung ke data RAG tanpa berimajinasi/berpikir terlalu jauh
+                    presence_penalty: 0.0,
+                    frequency_penalty: 0.0
+                }
             });
             const text = response.message.content;
             const cleanedText = (text.split('===JAWABAN===').pop() || text).trim();
