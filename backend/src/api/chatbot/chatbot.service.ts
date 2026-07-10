@@ -561,7 +561,7 @@ export class ChatbotService {
         if (searchMessage.includes("PENGADUAN_COMPLETED")) {
             rules = systemRulesConfirmation;
         }
-        const response = await this.gemini.chatbot(data.id, data.message, rules);
+        const response = await this.ollama.chatbot(data.id, data.message, rules);
         return {
             answer: response,
             confidence: contextChunks[0]?.similarity,
