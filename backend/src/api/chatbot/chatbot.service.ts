@@ -23,11 +23,12 @@ export class ChatbotService {
         private prisma: PrismaService,
         private ollama: OllamaService,
         private gemini: GeminiService,
-        private complaintService: ComplaintService,
         private configService: ConfigService,
-        private citizenService: CitizenService
     ) {
         this.baseUrlFrontend = configService.get<string>("BASE_URL_FRONTEND")!;
+    }
+    generateRandomId(min = 10000000, max = 99999999) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     async chatbot(data: { id: string, message: string }) {
@@ -49,7 +50,7 @@ export class ChatbotService {
         `;
         const contextText = contextChunks.map(c => c.content).join('\n\n');
         const systemRules = `
-        ${autoreply.join("\n") || "Anda adalah AI Asisten Desa yang membantu warga memperoleh informasi desa serta membuat laporan pengaduan."}
+        ${autoreply.map(a => a.aiPrompt).join('\n') || "Anda adalah AI Asisten Desa yang membantu warga memperoleh informasi desa serta membuat laporan pengaduan."}
 
         ====================================================
         KONTEKS
@@ -326,9 +327,241 @@ export class ChatbotService {
         Jangan mengirim JSON selain format yang telah ditentukan.
         Jangan pernah mencampurkan JSON ke dalam kalimat penjelasan.
         `;
+        let rules = '';
+        const systemRulesInfo = `
+        ${autoreply.map(a => a.aiPrompt).join("\n") || "Anda adalah AI Asisten Desa."}
 
+        ====================================================
+        KONTEKS
+        ====================================================
 
-        const response = await this.ollama.chatbot(data.id, data.message, systemRules);
+        ${contextText}
+
+        ====================================================
+        TUGAS
+        ====================================================
+
+        Anda adalah AI Asisten Desa.
+
+        Tugas Anda hanya menjawab pertanyaan warga mengenai informasi desa.
+
+        Aturan:
+
+        - Gunakan hanya informasi dari KONTEKS.
+        - Jangan mengarang informasi.
+        - Jika informasi tidak tersedia, katakan bahwa informasi belum tersedia dan sarankan menghubungi perangkat desa.
+        - Jangan membuat laporan pengaduan.
+        - Jangan meminta nama atau dusun.
+        - Jangan mengeluarkan JSON.
+
+        ====================================================
+        FORMAT OUTPUT
+        ====================================================
+
+        ===JAWABAN===
+
+        <jawaban>
+        `;
+        const systemRulesComplaint = `
+        ${autoreply.map(a => a.aiPrompt).join("\n") || "Anda adalah AI Asisten Desa."}
+
+        ====================================================
+        DATA PENGGUNA
+        ====================================================
+
+        Nama:
+        ${findHistory?.pushName || "-"}
+
+        Dusun:
+        ${findHistory?.subDistrict || "-"}
+
+        ====================================================
+        TUGAS
+        ====================================================
+
+        Anda membantu warga membuat laporan pengaduan.
+
+        Gunakan seluruh riwayat percakapan.
+
+        Jangan meminta data yang sudah diketahui.
+
+        ====================================================
+        IDENTITAS
+        ====================================================
+
+        Data yang dibutuhkan:
+
+        - name
+        - subDistrict
+
+        Jika salah satunya belum ada,
+        tanyakan HANYA data yang belum diketahui.
+
+        Jika sudah lengkap,
+        jangan tanyakan lagi.
+
+        ====================================================
+        DATA LAPORAN
+        ====================================================
+
+        Laporan harus memiliki:
+
+        - title
+        - description
+        - category
+
+        Aturan:
+
+        - title dibuat otomatis.
+        - description dirangkum dari seluruh percakapan.
+        - category ditentukan otomatis.
+        - Jangan meminta judul.
+        - Jangan meminta kategori jika sudah dapat ditentukan.
+
+        ====================================================
+        KATEGORI
+        ====================================================
+
+        INFRASTRUCTURE
+        - jalan
+        - jembatan
+        - lampu jalan
+        - drainase
+        - banjir
+        - saluran air
+
+        ADMINISTRATION
+        - surat
+        - pelayanan
+        - KTP
+        - KK
+
+        SECURITY
+        - pencurian
+        - keamanan
+
+        SOCIAL_ASSISTANCE
+        - BLT
+        - PKH
+        - bantuan sosial
+
+        HEALTH
+        - sampah
+        - sanitasi
+        - air bersih
+        - posyandu
+
+        OTHERS
+        - selain di atas
+
+        ====================================================
+        ATURAN
+        ====================================================
+
+        Jika informasi masih kurang,
+        tanyakan SATU pertanyaan paling penting.
+
+        Jangan menanyakan banyak pertanyaan sekaligus.
+
+        Jangan membuat JSON.
+
+        ====================================================
+        FORMAT OUTPUT
+        ====================================================
+
+        ===JAWABAN===
+
+        <jawaban>
+        `;
+        const systemRulesConfirmation = `
+        Anda membantu menyelesaikan laporan pengaduan.
+
+        ====================================================
+        DATA LAPORAN
+        ====================================================
+
+        Judul:
+        {{title}}
+
+        Kategori:
+        {{category}}
+
+        Deskripsi:
+        {{description}}
+
+        ====================================================
+        TUGAS
+        ====================================================
+
+        Jika pengguna BELUM menyetujui laporan,
+        tampilkan:
+
+        ===JAWABAN===
+
+        Silakan periksa kembali laporan Anda.
+
+        Judul:
+        {{title}}
+
+        Kategori:
+        {{category}}
+
+        Deskripsi:
+        {{description}}
+
+        Apakah laporan ini sudah benar?
+
+        ====================================================
+
+        Jika pengguna menjawab:
+
+        - ya
+        - benar
+        - setuju
+        - kirim
+        - lanjut
+        - oke
+        - siap
+
+        maka balas:
+
+        ===JAWABAN===
+
+        Baik, laporan Anda akan saya teruskan kepada perangkat desa.
+
+        Kemudian pada PALING AKHIR tuliskan:
+
+        <DataComplaint>
+        {
+        "action":"CREATE_COMPLAINT",
+        "data":{
+            "title":"{{title}}",
+            "description":"{{description}}",
+            "category":"{{category}}"
+        }
+        }
+        </DataComplaint>
+
+        ====================================================
+        ATURAN
+        ====================================================
+
+        - JSON harus valid.
+        - Jangan menggunakan Markdown.
+        - Jangan menambahkan penjelasan setelah JSON.
+        - JSON selalu berada di bagian paling akhir.
+        `;
+
+        if (searchMessage.includes("INFO")) {
+            rules = systemRulesInfo;
+        }
+        if (searchMessage.includes("PENGADUAN")) {
+            rules = systemRulesComplaint;
+        }
+        if (searchMessage.includes("PENGADUAN_COMPLETED")) {
+            rules = systemRulesConfirmation;
+        }
+        const response = await this.gemini.chatbot(data.id, data.message, rules);
         return {
             answer: response,
             confidence: contextChunks[0]?.similarity,
@@ -361,13 +594,15 @@ export class ChatbotService {
             });
 
             if (!citizen) {
-                const newCitizen = await this.citizenService.create({
-                    fullName: user.name,
-                    phoneNumber: number,
-                    platform: "WEB_CHAT",
-                    platformId: number,
-                    subDistrict: "",
-                    nik: ""
+                const newCitizen = await this.prisma.citizen.create({
+                    data: {
+                        id: number,
+                        fullName: user.name,
+                        platform: "WEB_CHAT",
+                        platformId: number,
+                        subDistrict: "",
+                        nik: ""
+                    }
                 });
 
                 historyChat = {
@@ -439,14 +674,17 @@ export class ChatbotService {
                         console.log('🎉 Data Pengaduan Ditemukan!', complaintData);
                         if (complaintData.action === 'CREATE_COMPLAINT') {
                             const cleanBotResponse = answer.replace(complaintRegex, '').trim();
-
-                            const newComplaint = await this.complaintService.create({
-                                category: complaintData.data.category,
-                                citizenId: number,
-                                description: complaintData.data.description,
-                                title: complaintData.data.title,
-                                status: "PENDING",
-                                officerNotes: "",
+                            const ticketNumber = this.generateRandomId(1000000, 99999999);
+                            const newComplaint = await this.prisma.complaint.create({
+                                data: {
+                                    ticketNumber: ticketNumber.toString(),
+                                    category: complaintData.data.category,
+                                    citizenId: historyChat.id,
+                                    description: complaintData.data.description,
+                                    title: complaintData.data.title,
+                                    status: "PENDING",
+                                    officerNotes: "",
+                                }
                             });
 
                             answer = `${cleanBotResponse}\n\n✅ *Pengaduan Anda berhasil kami terima.*\n📌 *Nomor Tiket:* _${newComplaint.ticketNumber}_\n\nMohon simpan nomor tiket tersebut untuk mengecek perkembangan pengaduan Anda melalui tautan berikut:\n${this.baseUrlFrontend}/complaint/search\n\nTerima kasih sudah melaporkan. 🙏`;
@@ -464,6 +702,10 @@ export class ChatbotService {
             { role: "user", content: message },
             { role: "system", content: answer }
         ]);
+        const MAX_HISTORY = 6;
+        if (historyChat.chat.length > MAX_HISTORY) {
+            historyChat.chat.splice(0, historyChat.chat.length - MAX_HISTORY);
+        }
         CACHE_RAM_HISTORY_CHAT[number] = historyChat;
 
         const parseNumber = number.startsWith("08") ? number.replace(/^0/, "62") : number;

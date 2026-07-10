@@ -84,11 +84,6 @@ export class OllamaService implements OnModuleInit {
                     }
                 ],
                 stream: false,
-                options: {
-                    temperature: 0.0, // Membuat jawaban sangat kaku dan langsung ke data RAG tanpa berimajinasi/berpikir terlalu jauh
-                    presence_penalty: 0.0,
-                    frequency_penalty: 0.0
-                }
             });
             const text = response.message.content;
             const cleanedText = (text.split('===JAWABAN===').pop() || text).trim();

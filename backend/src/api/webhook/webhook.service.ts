@@ -229,7 +229,7 @@ export class WebhookService {
             ]
         }).catch(() => null);
 
-        const MAX_HISTORY = 10;
+        const MAX_HISTORY = 6;
         if (historyChat.chat.length > MAX_HISTORY) {
             historyChat.chat.splice(0, historyChat.chat.length - MAX_HISTORY);
         }

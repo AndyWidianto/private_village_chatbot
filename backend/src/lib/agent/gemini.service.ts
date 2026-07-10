@@ -172,14 +172,54 @@ export class GeminiService implements OnModuleInit {
             try {
                 const model = this.genAI.getGenerativeModel({
                     model: m,
-                    systemInstruction: `Tugas kamu adalah mengekstrak inti sari dan kata kunci dari pesan warga desa untuk pencarian dokumen (RAG). 
-                        Hilangkan kata-kata basa-basi, singkatan tidak baku, dan emosi. 
-                        Ubah menjadi kalimat tanya atau pernyataan yang padat informasi dan mengandung kata kunci administratif yang relevan.
-                        format output: 
-                            Sebelum jawaban yang akan dibaca warga, WAJIB tulis:
-                            ===JAWABAN===
-                            Setelah itu baru berikan jawaban.
-                            Apabila perlu mengirim JSON, letakkan JSON di bagian PALING AKHIR.`
+                    systemInstruction: `
+                    Kamu bertugas mengubah pesan pengguna menjadi query pencarian dan menentukan jenis permintaan.
+
+                    Aturan:
+                    - Pahami maksud utama pengguna.
+                    - Hilangkan basa-basi, emosi, dan kata yang tidak penting.
+                    - Perbaiki bahasa tidak baku menjadi bahasa yang jelas.
+                    - Pertahankan kata kunci penting.
+                    - Jangan menambahkan informasi baru.
+                    - Jangan menjawab pertanyaan pengguna.
+
+                    Klasifikasi:
+
+                    INFO
+                    - Pengguna hanya meminta informasi atau bertanya.
+
+                    PENGADUAN
+                    - Pengguna ingin membuat pengaduan.
+                    - Pengguna sedang melengkapi data pengaduan.
+                    - Pengguna menjelaskan kronologi, lokasi, atau identitas.
+                    - Pengguna belum menyetujui laporan.
+
+                    PENGADUAN_COMPLETED
+                    - Digunakan HANYA jika pengguna menyetujui laporan yang telah diringkas sebelumnya.
+                    - Contoh persetujuan:
+                    ya
+                    benar
+                    setuju
+                    kirim
+                    lanjut
+                    lanjutkan
+                    oke
+                    siap
+
+                    Format output WAJIB:
+
+                    ===JAWABAN===
+                    INFO: <query>
+
+                    atau
+
+                    ===JAWABAN===
+                    PENGADUAN: <query>
+
+                    atau
+
+                    ===JAWABAN===
+                    PENGADUAN_COMPLETED: <query>`
                 });
                 let histoyGemini: Content[] = [];
                 if (history) {
@@ -199,6 +239,7 @@ export class GeminiService implements OnModuleInit {
                 });
                 const result = await stratChat.sendMessage(`Ekstrak kata kunci pencarian dari pesan ini: "${message}"`);
                 const text = result.response.text();
+                console.log(text);
                 const cleanedText = (text.split('===JAWABAN===').pop() || text).trim();
                 return cleanedText;
             } catch (err: unknown) {
