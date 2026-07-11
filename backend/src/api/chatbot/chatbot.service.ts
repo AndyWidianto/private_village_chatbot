@@ -8,6 +8,7 @@ import { PayloadJWT, ResultComplaint } from "@/lib/types";
 import { ComplaintService } from "../complaint/complaint.service";
 import { ConfigService } from "@nestjs/config";
 import { CitizenService } from "../citizen/citizen.service";
+import { ComplaintCategory } from "@prisma/client";
 
 
 
@@ -350,9 +351,6 @@ export class ChatbotService {
         - Gunakan hanya informasi dari KONTEKS.
         - Jangan mengarang informasi.
         - Jika informasi tidak tersedia, katakan bahwa informasi belum tersedia dan sarankan menghubungi perangkat desa.
-        - Jangan membuat laporan pengaduan.
-        - Jangan meminta nama atau dusun.
-        - Jangan mengeluarkan JSON.
 
         ====================================================
         FORMAT OUTPUT
@@ -360,7 +358,6 @@ export class ChatbotService {
 
         ===JAWABAN===
 
-        <jawaban>
         `;
         const systemRulesComplaint = `
         ${autoreply.map(a => a.aiPrompt).join("\n") || "Anda adalah AI Asisten Desa."}
@@ -470,8 +467,6 @@ export class ChatbotService {
         ====================================================
 
         ===JAWABAN===
-
-        <jawaban>
         `;
         const systemRulesConfirmation = `
         Anda membantu menyelesaikan laporan pengaduan.
@@ -675,10 +670,15 @@ export class ChatbotService {
                         if (complaintData.action === 'CREATE_COMPLAINT') {
                             const cleanBotResponse = answer.replace(complaintRegex, '').trim();
                             const ticketNumber = this.generateRandomId(1000000, 99999999);
+                            const category: ComplaintCategory = complaintData.data.category.includes("INFRASTRUCTURE") ? "INFRASTRUCTURE" : 
+                            complaintData.data.category.includes("ADMINISTRATION") ? "ADMINISTRATION" : 
+                            complaintData.data.category.includes("SECURITY") ? "SECURITY" : 
+                            complaintData.data.category.includes("SOCIAL_ASSISTANCE") ? "SOCIAL_ASSISTANCE" : 
+                            complaintData.data.category.includes("SOCIAL_ASSISTANCE") ? "HEALTH" : "OTHERS"
                             const newComplaint = await this.prisma.complaint.create({
                                 data: {
                                     ticketNumber: ticketNumber.toString(),
-                                    category: complaintData.data.category,
+                                    category: category,
                                     citizenId: historyChat.id,
                                     description: complaintData.data.description,
                                     title: complaintData.data.title,

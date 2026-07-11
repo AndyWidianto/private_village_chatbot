@@ -9,7 +9,7 @@ import { CitizenService } from "../citizen/citizen.service";
 import { ComplaintService } from "../complaint/complaint.service";
 import { CACHE_RAM_HISTORY_CHAT } from "@/lib/constant/constant-chats";
 import { ConfigService } from "@nestjs/config";
-import { StatusDevice } from "@prisma/client";
+import { ComplaintCategory, StatusDevice } from "@prisma/client";
 
 
 
@@ -180,8 +180,13 @@ export class WebhookService {
                         console.log('🎉 Data Pengaduan Ditemukan!', complaintData);
                         if (complaintData.action === 'CREATE_COMPLAINT') {
                             const cleanText = aiResponse.replace(complaintRegex, '').trim();
+                            const category: ComplaintCategory = complaintData.data.category.includes("INFRASTRUCTURE") ? "INFRASTRUCTURE" :
+                                complaintData.data.category.includes("ADMINISTRATION") ? "ADMINISTRATION" :
+                                    complaintData.data.category.includes("SECURITY") ? "SECURITY" :
+                                        complaintData.data.category.includes("SOCIAL_ASSISTANCE") ? "SOCIAL_ASSISTANCE" :
+                                            complaintData.data.category.includes("SOCIAL_ASSISTANCE") ? "HEALTH" : "OTHERS"
                             const newComplaint = await this.complaintService.create({
-                                category: complaintData.data.category,
+                                category: category,
                                 citizenId: number,
                                 description: complaintData.data.description,
                                 title: complaintData.data.title,
